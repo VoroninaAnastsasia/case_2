@@ -188,3 +188,85 @@ def find_secrets(text):
     
     result = list(set(vse))
     return resault
+
+
+# нормализовать и валидировать данные 
+def normalize_and_validate(text):
+    data_result = {
+        'phones': {'valid':[], 'invalid':[]},
+        'dates' : {'normalized': [], 'invalid': []},
+        'inn': {'valid': [], 'invalid': []},
+        'cards': {'valid': [], 'invalid': []}
+    }
+
+    # номер телефона 
+    phone_pattern = r'(?:\+7|8)[\s-]?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}'
+    phones = re.findall(phone_pattern, text)
+
+    for phone in phones:
+        digits = re.sub(r"\D", "", phone)
+
+        if re.fullmatch(r"7\d{10}", digits):
+            data_result["phones"]["valid"].append("+" + digits)
+        elif re.fullmatch(r"8\d{10}", digits):
+            normalized = "7" + digits[1:]
+            data_result["phones"]["valid"].append("+" + normalized)
+        else:
+            data_result["phones"]["invalid"].append(phone)
+
+    # дата 
+    date_pattern = r'\b\d{2}[./-]\d{2}[./-]\d{4}\b|\b\d{4}/\d{2}/\d{2}\b|\b\d{2}-[A-Za-z]{3}-\d{4}\b'
+    dates = re.findall(date_pattern, text)
+
+    for match in dates:
+        date_str = ''.join(match)
+
+        # 15.02.2024
+        if re.fullmatch(r'\d{2}\.\d{2}\.\d{4}', date_str):
+            day, month, year = date_str.split('.')
+            data_result['dates']['normalized'].append(f'{year}-{month}-{day}')
+
+        # 2024/02/15
+        elif re.fullmatch(r'\d{4}/\d{2}/\d{2}', date_str):
+            year, month, day = date_str.split('/')
+            data_result['dates']['normalized'].append(f'{year}-{month}-{day}')
+
+        # 15-Feb-2024
+        elif re.fullmatch(r'\d{2}-[A-Za-z]{3}-\d{4}', date_str):
+            day, month_str, year = date_str.split('-')
+            months = {
+                'Jan': '01','Feb': '02','Mar': '03','Apr': '04',
+                'May': '05','Jun': '06','Jul': '07','Aug': '08',
+                'Sep': '09','Oct': '10','Nov': '11','Dec': '12'
+            }
+            month = months.get(month_str, None)
+            if month:
+                data_result['dates']['normalized'].append(f'{year}-{month}-{day}')
+            else:
+                data_result['dates']['invalid'].append(date_str)
+
+    # инн
+    inn_pattern = r"\b\d{10}\b|\b\d{12}\b"
+    inns = re.findall(inn_pattern, text)
+
+    for inn in inns:
+        # только форматная проверка через рег
+        if re.fullmatch(r"\d{10}", inn) or re.fullmatch(r"\d{12}",inn):
+            data_result["inn"]["valid"].append(inn)
+        else:
+            data_result["inn"]["invalid"].append(inn)
+
+    # карты 
+    card_pattern = r'\b(?:\d{4}[\s-]?){4}\b'
+    cards = re.findall(card_pattern, text)
+
+    for card in cards:
+        digits = re.sub(r'\D', '', card)
+
+        if re.fullmatch(r'\d{16}', digits) and luhn(digits):
+            data_result['cards']['valid'].append(digits)
+        else:
+            data_result['cards']['invalid'].append(card)
+
+    return data_result
+

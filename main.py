@@ -71,15 +71,15 @@ def extract_system_info(text):
         r'(?=\s|$|[,;\'"])'
     )
 
-    result = {}
+    result_info = {}
 
     # Emails
     emails = list(dict.fromkeys(re.findall(email_pattern, text)))
-    result['emails'] = emails
+    result_info['emails'] = emails
 
     # IPs
     ips = list(dict.fromkeys(re.findall(ip_pattern, text)))
-    result['ips'] = ips
+    result_info['ips'] = ips
 
     # Files с фильтрацией некорректных имен
     file_candidates = re.findall(file_pattern, text)
@@ -95,9 +95,9 @@ def extract_system_info(text):
         if invalid_name:
             continue
         valid_files.append(file_name)
-    result['files'] = list(dict.fromkeys(valid_files))
+    result_info['files'] = list(dict.fromkeys(valid_files))
 
-    return result
+    return result_info
 
 # Функция проверки Луна
 def luhn(card_num):

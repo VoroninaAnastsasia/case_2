@@ -1,5 +1,7 @@
 # operation_data_shield.py
 
+import re
+
 # Анализирует логи веб-сервера на предмет атак
 def analyze_logs(log_text):
     patterns = {

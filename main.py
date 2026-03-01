@@ -98,3 +98,93 @@ def extract_system_info(text):
     result['files'] = list(dict.fromkeys(valid_files))
 
     return result
+
+# Функция проверки Луна
+def luhn(card_num):
+    digits = []
+    for sym in card_num:
+        if sym.isdigit():
+            digits.append(int(sym))
+            
+    if len(digits) != 16:
+        return False
+
+    reversed_digits = []
+    for i in range(len(digits)-1, -1, -1):
+        reversed_digits.append(digits[i])
+
+    total = 0
+    for index in range(len(reversed_digits)):
+        digit = reversed_digits[index]
+
+        if index % 2 == 1:
+            digit = digit * 2
+            if digit > 9:
+                digit = digit - 9 
+        
+        total = total + digit
+        
+    if total % 10 == 0:
+        return True
+    else:
+        return False
+
+# Функция поиска банковских карт
+def find_and_validate_credit_cards(text):
+    pravilnye_karty = []
+    nepravilnye_karty = []
+
+    rv = r'\b(?:\d[ -]*?){15}\d\b'
+    vse_potencialnye_karty = re.findall(rv, text)
+    
+    for karta in vse_potencialnye_karty:
+        tolko_cifry = ''
+        for sym in karta:
+            if sym.isdigit():
+                tolko_cifry = tolko_cifry + sym
+        
+        if len(tolko_cifry) != 16:
+            continue
+        
+        if proverka_luna(tolko_cifry):
+            pravilnye_karty.append(karta)
+        else:
+            nepravilnye_karty.append(karta)
+
+    return {'valid': pravilnye_karty, 'invalid': nepravilnye_karty}
+
+# Функция поиска секретов
+def find_secrets(text):
+    vse = []
+    
+    key1 = re.findall(r'sk_live_[a-zA-Z0-9]+', text)
+    for k in key1:
+        vse.append(k)
+        
+    key2 = re.findall(r'pk_test_[a-zA-Z0-9]+', text)
+    for k in key2:
+        vse.append(k)
+
+    slova = text.split()
+    spec = '!@#$%^&*()_+-=[]{};:,.<>?/~`'
+    
+    for slovo in slova:
+        if len(slovo) >= 8:
+            buk = 0
+            cif = 0
+            spc = 0
+            
+            for s in slovo:
+                if s.isalpha():
+                    buk = 1
+                if s.isdigit():
+                    cif = 1
+                if s in spec:
+                    spc = 1
+
+            if buk == 1 and cif == 1 and spc == 1:
+                if 'sk_live_' not in slovo and 'pk_test_' not in slovo:
+                    vse.append(slovo)
+    
+    result = list(set(vse))
+    return resault

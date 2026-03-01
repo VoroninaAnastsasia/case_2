@@ -270,3 +270,62 @@ def normalize_and_validate(text):
 
     return data_result
 
+
+# Поиск и расшифровка скрытых сообщений
+def decode_messages(text):
+    result_kripto = {'base64': [], 'hex': [], 'rot13': []}
+
+    # Base64
+    base64_pattern = r'(?:^|(?<=\s))([A-Za-z0-9+/]{8,}={0,2})(?:$|(?=\s))'
+    base64_matches = re.findall(base64_pattern, text)
+    seen_base64 = set()
+
+    for encoded in base64_matches:
+        encoded = encoded.strip()
+        if encoded in seen_base64:
+            continue
+        seen_base64.add(encoded)
+        # добавляем padding для корректного декодирования
+        padding = '=' * (-len(encoded) % 4)
+        try:
+            decoded = base64.b64decode(encoded + padding, validate=True).decode('utf-8')
+        except (base64.binascii.Error, UnicodeDecodeError):
+            decoded = None
+        result_kripto['base64'].append({'encoded': encoded, 'decoded': decoded})
+
+    # Hex 
+    hex_pattern = r'\b0x[A-Fa-f0-9]+\b|\\x[A-Fa-f0-9]{2}'
+    hex_matches = re.findall(hex_pattern, text)
+    seen_hex = set()
+
+    for encoded in hex_matches:
+        if encoded in seen_hex:
+            continue
+        seen_hex.add(encoded)
+        try:
+            if encoded.startswith('0x'):
+                decoded_bytes = bytes.fromhex(encoded[2:])
+            else:  # формат \x..
+                decoded_bytes = bytes.fromhex(encoded[2:])
+            try:
+                decoded = decoded_bytes.decode('utf-8')
+            except UnicodeDecodeError:
+                decoded = decoded_bytes
+        except ValueError:
+            decoded = None
+        result_kripto['hex'].append({'encoded': encoded, 'decoded': decoded})
+
+    # ROT13
+    rot13_pattern = r'\b[a-zA-Z]{2,}\b'
+    rot13_matches = re.findall(rot13_pattern, text)
+    seen_rot13 = set()
+
+    for word in rot13_matches:
+        if word in seen_rot13:
+            continue
+        seen_rot13.add(word)
+        decoded = codecs.decode(word, 'rot_13')
+        result_kripto['rot13'].append({'encoded': word, 'decoded': decoded})
+
+    return result_kripto
+

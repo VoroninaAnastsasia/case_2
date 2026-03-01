@@ -48,3 +48,51 @@ def analyze_logs(log_text):
 
     return log_results
 
+
+# Поиск email, IPv4 и файлов
+def extract_system_info(text):
+    email_pattern = (
+        r'(?<!\S)[A-Za-z0-9_%+\-]+(?:\.[A-Za-z0-9_%+\-]+)*@'
+        r'(?:[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\.)+[A-Za-z]{2,6}'
+        r'(?=\s|$|[,;])'
+    )
+
+    ip_pattern = (
+        r'(?<![\d.])(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.'
+        r'(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.'
+        r'(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.'
+        r'(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?![\d.])'
+    )
+
+    file_pattern = (
+        r'(?<!\S)[\w\-]+(?:\.[\w\-]+)*\.(?:txt|log|csv|json|xml|pdf|docx?)'
+        r'(?=\s|$|[,;\'"])'
+    )
+
+    result = {}
+
+    # Emails
+    emails = list(dict.fromkeys(re.findall(email_pattern, text)))
+    result['emails'] = emails
+
+    # IPs
+    ips = list(dict.fromkeys(re.findall(ip_pattern, text)))
+    result['ips'] = ips
+
+    # Files с фильтрацией некорректных имен
+    file_candidates = re.findall(file_pattern, text)
+    valid_files = []
+    # фильтруем некорректные имена файлов (точка в начале/конце, двойные точки)
+    for file_name in file_candidates:
+        base_name = file_name.rsplit('.', 1)[0]
+        invalid_name = (
+            base_name.startswith('.') or
+            base_name.endswith('.') or
+            '..' in base_name
+        )
+        if invalid_name:
+            continue
+        valid_files.append(file_name)
+    result['files'] = list(dict.fromkeys(valid_files))
+
+    return result

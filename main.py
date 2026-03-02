@@ -1,6 +1,8 @@
 # operation_data_shield.py
 
 import re
+import base64
+import codecs
 
 # Анализирует логи веб-сервера на предмет атак
 def analyze_logs(log_text):

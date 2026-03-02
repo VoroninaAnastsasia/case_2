@@ -275,61 +275,75 @@ def normalize_and_validate(text):
 
 # Поиск и расшифровка скрытых сообщений
 def decode_messages(text):
-    result_kripto = {'base64': [], 'hex': [], 'rot13': []}
-
-    # Base64
-    base64_pattern = r'(?:^|(?<=\s))([A-Za-z0-9+/]{8,}={0,2})(?:$|(?=\s))'
-    base64_matches = re.findall(base64_pattern, text)
     seen_base64 = set()
+    seen_hex = set()
+    seen_rot13 = set()
+    decoded_words_set = set()
+    output_lines = []
 
-    for encoded in base64_matches:
-        encoded = encoded.strip()
+    base64_pattern = r'(?:[A-Za-z0-9+/]{4}){2,}(?:={0,2})'
+    output_lines.append("BASE64:")
+    for encoded in re.findall(base64_pattern, text):
         if encoded in seen_base64:
             continue
         seen_base64.add(encoded)
-        # добавляем padding для корректного декодирования
-        padding = '=' * (-len(encoded) % 4)
         try:
-            decoded = base64.b64decode(encoded + padding, validate=True).decode('utf-8')
-        except (base64.binascii.Error, UnicodeDecodeError):
-            decoded = None
-        result_kripto['base64'].append({'encoded': encoded, 'decoded': decoded})
+            decoded_bytes = base64.b64decode(encoded, validate=True)
+            decoded_str = decoded_bytes.decode('utf-8')
+            output_lines.append(
+                f"encoded: {encoded}\n"
+                f"decoded: {decoded_str}\n"
+            )
+            decoded_words_set.update(decoded_str.split())
+        except Exception:
+            continue
 
-    # Hex 
-    hex_pattern = r'\b0x[A-Fa-f0-9]+\b|\\x[A-Fa-f0-9]{2}'
-    hex_matches = re.findall(hex_pattern, text)
-    seen_hex = set()
-
-    for encoded in hex_matches:
+    hex_pattern = (
+        r'0x[A-Fa-f0-9]{2,}'
+        r'|(?:\\x[A-Fa-f0-9]{2})+'
+        r'|\b[A-Fa-f0-9]{8,}\b'
+    )
+    output_lines.append("HEX:")
+    for encoded in re.findall(hex_pattern, text):
         if encoded in seen_hex:
             continue
         seen_hex.add(encoded)
         try:
             if encoded.startswith('0x'):
-                decoded_bytes = bytes.fromhex(encoded[2:])
-            else:  # формат \x..
-                decoded_bytes = bytes.fromhex(encoded[2:])
-            try:
-                decoded = decoded_bytes.decode('utf-8')
-            except UnicodeDecodeError:
-                decoded = decoded_bytes
-        except ValueError:
-            decoded = None
-        result_kripto['hex'].append({'encoded': encoded, 'decoded': decoded})
+                hex_str = encoded[2:]
+            elif encoded.startswith('\\x'):
+                hex_str = encoded.replace('\\x', '')
+            else:
+                hex_str = encoded
+            if len(hex_str) % 2 != 0:
+                hex_str = '0' + hex_str
+            decoded_bytes = bytes.fromhex(hex_str)
+            decoded_str = decoded_bytes.decode('utf-8', errors='replace')
+            output_lines.append(
+                f"encoded: {encoded}\n"
+                f"decoded: {decoded_str}\n"
+            )
+            decoded_words_set.update(decoded_str.split())
+        except Exception:
+            continue
 
-    # ROT13
-    rot13_pattern = r'\b[a-zA-Z]{2,}\b'
-    rot13_matches = re.findall(rot13_pattern, text)
-    seen_rot13 = set()
-
-    for word in rot13_matches:
-        if word in seen_rot13:
+    rot13_pattern = r'\b[a-zA-Z]{4,}\b'
+    output_lines.append("ROT13:")
+    for word in re.findall(rot13_pattern, text):
+        if word in seen_rot13 or word in decoded_words_set:
             continue
         seen_rot13.add(word)
-        decoded = codecs.decode(word, 'rot_13')
-        result_kripto['rot13'].append({'encoded': word, 'decoded': decoded})
+        try:
+            decoded = codecs.decode(word, 'rot_13')
+            output_lines.append(
+                f"encoded: {word}\n"
+                f"decoded: {decoded}\n"
+            )
+        except Exception:
+            continue
 
-    return result_kripto
+    return "\n".join(output_lines)
+
 
 def process_file(input_path, output_path):
     try:

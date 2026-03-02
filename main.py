@@ -343,7 +343,7 @@ def process_file(input_path, output_path):
         "decoded_messages": decode_messages(text)
     }
 
-    with open(output_path, "w", endcoding="utf-8) as f: 
+    with open(output_path, "w", endcoding="utf-8") as f: 
               json.dump(results, f, indent=4, ensure_ascii=False)
 
     print(f'Анализ завершен. Результат сохранен в {output_path}')

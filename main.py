@@ -332,23 +332,29 @@ def decode_messages(text):
     return result_kripto
 
 def process_file(input_path, output_path):
-    with open (input_path, "r", endcoding="utf-8") as f:
-        text = f.read()
-    results = {
-        "log_analysis": analyze_logs(text),
-        "system_info": extract_system_info(text),
-        "credit_cards": find_credit_cards(text),
-        "secrets": find_secrets(text),
-        "normalized_data": normalize_and_validate(text),
-        "decoded_messages": decode_messages(text)
-    }
+    try:
+        with open (input_path, "r", encoding="utf-8") as f:
+            text = f.read()
+            
+        results = {
+            "log_analysis": analyze_logs(text),
+            "system_info": extract_system_info(text),
+            "credit_cards": find_credit_cards(text),
+            "secrets": find_secrets(text),
+            "normalized_data": normalize_and_validate(text),
+            "decoded_messages": decode_messages(text)
+        }
 
-    with open(output_path, "w", endcoding="utf-8") as f: 
+        with open(output_path, "w", encoding="utf-8") as f: 
               json.dump(results, f, indent=4, ensure_ascii=False)
 
-    print(f'Анализ завершен. Результат сохранен в {output_path}')
+        print(f'Анализ завершен. Результат сохранен в {output_path}')
+        
+except FileNotFoundError:
+        print(f"Файл '{input_path}' не найден!")
+        return
 
 if __name__ == "__main__":
     input_file = "messy_data.txt"
     output_file = "result.json"
-    pricess_file(input_file, output_file)
+    process_file(input_file, output_file)

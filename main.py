@@ -350,7 +350,7 @@ def process_file(input_path, output_path):
 
         print(f'Анализ завершен. Результат сохранен в {output_path}')
         
-except FileNotFoundError:
+    except FileNotFoundError:
         print(f"Файл '{input_path}' не найден!")
         return
 

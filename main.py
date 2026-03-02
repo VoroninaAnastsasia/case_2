@@ -130,28 +130,28 @@ def luhn(card_num):
         return False
 
 # Функция поиска банковских карт
-def find_and_validate_credit_cards(text):
-    pravilnye_karty = []
-    nepravilnye_karty = []
+def find_credit_cards(text):
+    correct_cards = []
+    not_correct_cards = []
 
     rv = r'\b(?:\d[ -]*?){15}\d\b'
-    vse_potencialnye_karty = re.findall(rv, text)
+    would_be_cards = re.findall(rv, text)
     
-    for karta in vse_potencialnye_karty:
-        tolko_cifry = ''
-        for sym in karta:
+    for card in would_be_cards:
+        only_digits = ''
+        for sym in card:
             if sym.isdigit():
-                tolko_cifry = tolko_cifry + sym
+                only_digits = only_digits + sym
         
-        if len(tolko_cifry) != 16:
+        if len(only_digits) != 16:
             continue
         
-        if proverka_luna(tolko_cifry):
-            pravilnye_karty.append(karta)
+        if luhn(only_digits):
+            correct_cards.append(card)
         else:
-            nepravilnye_karty.append(karta)
+            not_correct_cards.append(card)
 
-    return {'valid': pravilnye_karty, 'invalid': nepravilnye_karty}
+    return {'valid': correct_cards, 'invalid': not_correct_cards}
 
 # Функция поиска секретов
 def find_secrets(text):

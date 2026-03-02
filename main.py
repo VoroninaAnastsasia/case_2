@@ -3,6 +3,7 @@
 import re
 import base64
 import codecs
+import json
 
 # Анализирует логи веб-сервера на предмет атак
 def analyze_logs(log_text):
@@ -35,7 +36,6 @@ def analyze_logs(log_text):
 
 
     log_results = {}
-
     lines = log_text.split('\n')
 
     for key, pattern in patterns.items():
@@ -331,3 +331,24 @@ def decode_messages(text):
 
     return result_kripto
 
+def process_file(input_path, output_path):
+    with open (input_path, "r", endcoding="utf-8") as f:
+        text = f.read()
+    results = {
+        "log_analysis": analyze_logs(text),
+        "system_info": extract_system_info(text),
+        "credit_cards": find_credit_cards(text),
+        "secrets": find_secrets(text),
+        "normalized_data": normalize_and_validate(text),
+        "decoded_messages": decode_messages(text)
+    }
+
+    with open(output_path, "w", endcoding="utf-8) as f: 
+              json.dump(results, f, indent=4, ensure_ascii=False)
+
+    print(f'Анализ завершен. Результат сохранен в {output_path}')
+
+if __name__ == "__main__":
+    input_file = "messy_data.txt"
+    output_file = "result.json"
+    pricess_file(input_file, output_file)

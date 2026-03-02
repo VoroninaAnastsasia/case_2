@@ -155,39 +155,39 @@ def find_and_validate_credit_cards(text):
 
 # Функция поиска секретов
 def find_secrets(text):
-    vse = []
+    all_secrets = []
     
     key1 = re.findall(r'sk_live_[a-zA-Z0-9]+', text)
     for k in key1:
-        vse.append(k)
+        all_secrets.append(k)
         
     key2 = re.findall(r'pk_test_[a-zA-Z0-9]+', text)
     for k in key2:
-        vse.append(k)
+        all_secrets.append(k)
 
-    slova = text.split()
+    words = text.split()
     spec = '!@#$%^&*()_+-=[]{};:,.<>?/~`'
     
-    for slovo in slova:
-        if len(slovo) >= 8:
-            buk = 0
-            cif = 0
-            spc = 0
+    for word in words:
+        if len(word) >= 6:
+            alph = 0
+            digit = 0
+            special = 0
             
-            for s in slovo:
-                if s.isalpha():
-                    buk = 1
-                if s.isdigit():
-                    cif = 1
-                if s in spec:
-                    spc = 1
+            for sym in word:
+                if sym.isalpha():
+                    alph = 1
+                if sym.isdigit():
+                    digit = 1
+                if sym in spec:
+                    special = 1
 
-            if buk == 1 and cif == 1 and spc == 1:
-                if 'sk_live_' not in slovo and 'pk_test_' not in slovo:
-                    vse.append(slovo)
+            if alph == 1 and digit == 1 and special == 1:
+                if 'sk_live_' not in word and 'pk_test_' not in word:
+                    all_secrets.append(word)
     
-    result = list(set(vse))
-    return resault
+    result = list(set(all_secrets))
+    return result
 
 
 # нормализовать и валидировать данные 

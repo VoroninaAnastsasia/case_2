@@ -291,6 +291,8 @@ def save_all_artifacts(report, filename):
             artifacts.append(item)
     
     for item in report["secrets"]:
+        if len(item) < 10 or len(item) > 200:  
+            continue
         if item not in seen:
             seen.add(item)
             artifacts.append(item)
@@ -307,16 +309,15 @@ def save_all_artifacts(report, filename):
         if item not in seen:
             seen.add(item)
             artifacts.append(item)
+    
     for item in report["decoded_messages"]:
-        if "Base64 encoded:" in item:
-            encoded = item.split(": ", 1)[-1]
-            if encoded not in seen:
-                seen.add(encoded)
-                artifacts.append(encoded)
-        elif re.match(r'^[A-Za-z0-9+/]{20,}=*$', item):
-            if item not in seen:
-                seen.add(item)
-                artifacts.append(item)
+        if isinstance(item, str) and len(item) < 200:  # Только короткие строки
+            if "Base64 encoded:" in item:
+                encoded = item.split(": ", 1)[-1]
+                if re.match(r'^[A-Za-z0-9+/]{20,}=*$', encoded) and len(encoded) < 100:
+                    if encoded not in seen:
+                        seen.add(encoded)
+                        artifacts.append(encoded)
     
     for item in report["normalized_data"]["phones"]["valid"]:
         if item not in seen:
@@ -329,14 +330,14 @@ def save_all_artifacts(report, filename):
     
     for key, val in report["security_threats"].items():
         for item in val["items"]:
-            if item not in seen:
-                seen.add(item)
-                artifacts.append(item)
+            if len(item) < 200:  # Только короткие строки
+                if item not in seen:
+                    seen.add(item)
+                    artifacts.append(item)
     
     with open(filename, "w", encoding="utf-8") as f:
         for item in artifacts:
             f.write(str(item) + "\n")
-
             
 if __name__ == "__main__":
     group_number = 8   # номер группы (1-10)

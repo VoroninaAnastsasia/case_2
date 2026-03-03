@@ -8,7 +8,7 @@ import json
 def analyze_logs(log_text):
     patterns = {
         'sql_injections': re.compile(
-            r"(\bUNION\b.*\bSELECT\b|\bOR\b\s+1=1|\bDROP\b\s+\bTABLE\b|\bSELECT\b.*\bFROM\b)",
+            r"(\bUNION\b\s+ALL?\s+\bSELECT\b|\bOR\b\s+1\s*=\s*1|\bDROP\b\s+TABLE\b|--|\bINSERT\b\s+INTO\b.*\bVALUES\b\s*\()",
             re.IGNORECASE
         ),
         'xss_attempts': re.compile(

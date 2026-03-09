@@ -348,3 +348,57 @@ if __name__ == "__main__":
     output_file = f"result{group_number}.txt"
     save_all_artifacts(report, output_file)
     print(f"\nСоздан файл {output_file}")
+
+
+def compare_results(group_number, other_groups):
+    """
+    Сравнивает результат текущей группы с результатами других групп
+    
+    group_number: номер вашей группы (например, 8)
+    other_groups: список номеров других групп для сравнения
+    """
+    
+    # Читаем ваш файл
+    your_file = f"result{group_number}.txt"
+    with open(your_file, 'r', encoding='utf-8') as f:
+        your_results = set([line.strip() for line in f if line.strip()])
+    
+    print(f"\n{'='*50}")
+    print(f"СРАВНЕНИЕ ГРУППЫ {group_number} С ДРУГИМИ ГРУППАМИ")
+    print(f"{'='*50}")
+    print(f"В вашем файле: {len(your_results)} артефактов\n")
+    
+    # Сравниваем с каждой группой
+    for other in other_groups:
+        try:
+            other_file = f"result{other}.txt"
+            with open(other_file, 'r', encoding='utf-8') as f:
+                other_results = set([line.strip() for line in f if line.strip()])
+            
+            # Находим совпадения и различия
+            common = your_results & other_results
+            only_in_yours = your_results - other_results
+            only_in_theirs = other_results - your_results
+            
+            print(f"Группа {other}: {len(other_results)} артефактов")
+            print(f"Совпадает: {len(common)}")
+            print(f"Есть только у вас: {len(only_in_yours)}")
+            print(f"Есть только у них: {len(only_in_theirs)}")
+            
+            # Показываем примеры (первые 3)
+            if only_in_yours:
+                print(f"Примеры (только у вас):")
+                for item in list(only_in_yours)[:3]:
+                    print(f"     • {item}")
+            if only_in_theirs:
+                print(f"Примеры (только у них):")
+                for item in list(only_in_theirs)[:3]:
+                    print(f"     • {item}")
+            print()
+            
+        except FileNotFoundError:
+            print(f"Файл группы {other} не найден\n")
+
+
+# Использование:
+compare_results(8, [1, 2, 3, 4, 5, 6, 7, 9, 10])

@@ -379,7 +379,7 @@ def compare_results(group_number, other_groups):
             print(f"Файл группы {other} не найден\n")
 
 if __name__ == "__main__":
-    group_number = 8   # номер группы (1-10)
+    group_number = 8   # номер группы (1-13)
     with open("input.txt", "r", encoding="utf-8") as f:
         text = f.read()
     report = generate_report(text)
@@ -387,4 +387,4 @@ if __name__ == "__main__":
     output_file = f"result{group_number}.txt"
     save_all_artifacts(report, output_file)
     print(f"\nСоздан файл {output_file}")
-    compare_results(8, [1, 2, 3, 4, 5, 6, 7, 9, 10])
+    compare_results(8, [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13])

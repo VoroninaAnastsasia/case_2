@@ -367,11 +367,11 @@ def compare_results(group_number, other_groups):
             
             if only_in_yours:
                 print(f"Примеры (только у вас):")
-                for item in list(only_in_yours)[:3]:
+                for item in list(only_in_yours):
                     print(f"     • {item}")
             if only_in_theirs:
                 print(f"Примеры (только у них):")
-                for item in list(only_in_theirs)[:3]:
+                for item in list(only_in_theirs):
                     print(f"     • {item}")
             print()
             

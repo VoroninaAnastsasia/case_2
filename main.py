@@ -311,7 +311,7 @@ def save_all_artifacts(report, filename):
             artifacts.append(item)
     
     for item in report["decoded_messages"]:
-        if isinstance(item, str) and len(item) < 200:  # Только короткие строки
+        if isinstance(item, str) and len(item) < 200: 
             if "Base64 encoded:" in item:
                 encoded = item.split(": ", 1)[-1]
                 if re.match(r'^[A-Za-z0-9+/]{20,}=*$', encoded) and len(encoded) < 100:
@@ -330,7 +330,7 @@ def save_all_artifacts(report, filename):
     
     for key, val in report["security_threats"].items():
         for item in val["items"]:
-            if len(item) < 200:  # Только короткие строки
+            if len(item) < 200:  
                 if item not in seen:
                     seen.add(item)
                     artifacts.append(item)
@@ -339,26 +339,8 @@ def save_all_artifacts(report, filename):
         for item in artifacts:
             f.write(str(item) + "\n")
             
-if __name__ == "__main__":
-    group_number = 8   # номер группы (1-10)
-    with open("input.txt", "r", encoding="utf-8") as f:
-        text = f.read()
-    report = generate_report(text)
-    print_report(report)
-    output_file = f"result{group_number}.txt"
-    save_all_artifacts(report, output_file)
-    print(f"\nСоздан файл {output_file}")
-
-
 def compare_results(group_number, other_groups):
-    """
-    Сравнивает результат текущей группы с результатами других групп
     
-    group_number: номер вашей группы (например, 8)
-    other_groups: список номеров других групп для сравнения
-    """
-    
-    # Читаем ваш файл
     your_file = f"result{group_number}.txt"
     with open(your_file, 'r', encoding='utf-8') as f:
         your_results = set([line.strip() for line in f if line.strip()])
@@ -368,14 +350,12 @@ def compare_results(group_number, other_groups):
     print(f"{'='*50}")
     print(f"В вашем файле: {len(your_results)} артефактов\n")
     
-    # Сравниваем с каждой группой
     for other in other_groups:
         try:
             other_file = f"result{other}.txt"
             with open(other_file, 'r', encoding='utf-8') as f:
                 other_results = set([line.strip() for line in f if line.strip()])
             
-            # Находим совпадения и различия
             common = your_results & other_results
             only_in_yours = your_results - other_results
             only_in_theirs = other_results - your_results
@@ -385,7 +365,6 @@ def compare_results(group_number, other_groups):
             print(f"Есть только у вас: {len(only_in_yours)}")
             print(f"Есть только у них: {len(only_in_theirs)}")
             
-            # Показываем примеры (первые 3)
             if only_in_yours:
                 print(f"Примеры (только у вас):")
                 for item in list(only_in_yours)[:3]:
@@ -399,6 +378,13 @@ def compare_results(group_number, other_groups):
         except FileNotFoundError:
             print(f"Файл группы {other} не найден\n")
 
-
-# Использование:
-compare_results(8, [1, 2, 3, 4, 5, 6, 7, 9, 10])
+if __name__ == "__main__":
+    group_number = 8   # номер группы (1-10)
+    with open("input.txt", "r", encoding="utf-8") as f:
+        text = f.read()
+    report = generate_report(text)
+    print_report(report)
+    output_file = f"result{group_number}.txt"
+    save_all_artifacts(report, output_file)
+    print(f"\nСоздан файл {output_file}")
+    compare_results(8, [1, 2, 3, 4, 5, 6, 7, 9, 10])

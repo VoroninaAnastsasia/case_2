@@ -3,7 +3,6 @@
 import re
 import base64
 import codecs
-import json
 
 def analyze_logs(log_text):
     patterns = {

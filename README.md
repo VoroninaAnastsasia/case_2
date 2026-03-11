@@ -1,1 +1,1 @@
-# case_2
+This Python script analyzes input text to detect and extract sensitive data such as credit card numbers, API keys, emails, IPs, and encoded messages, while also identifying potential security threats like SQL injections and XSS attempts. It generates a structured report, saves the discovered artifacts to a file, and can compare results across different groups to highlight unique findings.
